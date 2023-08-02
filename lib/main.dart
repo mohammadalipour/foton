@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foton/common/routes/pages.dart';
 import 'package:get/get.dart';
 
@@ -11,15 +12,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Foton',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      initialRoute: AppPages.INITIAL,
-      getPages: AppPages.routes,
-    );
+    return ScreenUtilInit(
+        designSize: const Size(360, 780),
+        builder: (context, child) =>
+            GetMaterialApp(
+              title: 'Foton',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                useMaterial3: true,
+              ),
+              initialRoute: AppPages.INITIAL,
+              getPages: AppPages.routes,
+            ));
   }
 }

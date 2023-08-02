@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../pages/frame/welcome/index.dart';
+import '../../pages/message/index.dart';
+import '../middlewares/router_auth.dart';
 import 'routes.dart';
 
 class AppPages {
@@ -14,6 +16,9 @@ class AppPages {
       page: () => const WelcomePage(),
       binding: WelcomeBinding(),
     ),
+    GetPage(name: AppRoutes.Message, page: () => const MessagePage(), binding: MessageBinding(),middlewares: [
+      RouteAuthMiddleware(priority: 1),
+    ],),
     /*
     GetPage(
       name: AppRoutes.SIGN_IN,
@@ -35,9 +40,7 @@ class AppPages {
     GetPage(name: AppRoutes.Phone, page: () => PhonePage(), binding: PhoneBinding()),
     GetPage(name: AppRoutes.SendCode, page: () => SendCodePage(), binding: SendCodeBinding()),
     GetPage(name: AppRoutes.Contact, page: () => ContactPage(), binding: ContactBinding()),
-    GetPage(name: AppRoutes.Message, page: () => MessagePage(), binding: MessageBinding(),middlewares: [
-       RouteAuthMiddleware(priority: 1),
-     ],),
+
     GetPage(name: AppRoutes.Profile, page: () => ProfilePage(), binding: ProfileBinding()),
     GetPage(name: AppRoutes.Chat, page: () => ChatPage(), binding: ChatBinding()),
 
