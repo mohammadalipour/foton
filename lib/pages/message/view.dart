@@ -10,7 +10,7 @@ class MessagePage extends GetView<MessageController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+      body: Center(child: Text("i'm in meesage"),),
     );
   }
 }
