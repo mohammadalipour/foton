@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../pages/frame/welcome/index.dart';
+import '../../pages/frame/sign_in/index.dart';
 import '../../pages/message/index.dart';
 import '../middlewares/router_auth.dart';
 import 'routes.dart';
@@ -19,12 +20,13 @@ class AppPages {
     GetPage(name: AppRoutes.Message, page: () => const MessagePage(), binding: MessageBinding(),middlewares: [
       RouteAuthMiddleware(priority: 1),
     ],),
-    /*
+
     GetPage(
       name: AppRoutes.SIGN_IN,
-      page: () => SignInPage(),
+      page: () => const SignInPage(),
       binding: SignInBinding(),
     ),
+    /*
     // GetPage(
     //   name: AppRoutes.Application,
     //   page: () => ApplicationPage(),

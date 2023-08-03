@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foton/common/routes/pages.dart';
 import 'package:get/get.dart';
 
-void main() {
+import 'global.dart';
+
+Future<void> main() async {
+  await Global.init();
   runApp(const MyApp());
 }
 
