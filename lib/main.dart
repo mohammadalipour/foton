@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foton/common/routes/pages.dart';
+import 'package:foton/common/style/style.dart';
 import 'package:get/get.dart';
 
 import 'global.dart';
@@ -21,10 +22,7 @@ class MyApp extends StatelessWidget {
             GetMaterialApp(
               title: 'Foton',
               debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-                useMaterial3: true,
-              ),
+              theme: AppTheme.light,
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
             ));
