@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:foton/common/apis/apis.dart';
 import 'package:foton/common/entities/entities.dart';
 import 'package:foton/common/store/store.dart';
-import 'package:foton/common/utils/http.dart';
+import 'package:foton/common/widgets/toast.dart';
 import 'package:foton/pages/frame/sign_in/state.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -34,7 +37,7 @@ class SignInController extends GetxController {
             loginPanelListRequestEntity.email = email;
             loginPanelListRequestEntity.open_id = id;
             loginPanelListRequestEntity.type = 2;
-            asyncPostData();
+            asyncPostData(loginPanelListRequestEntity);
           }
           break;
         case "Facebook":
@@ -59,8 +62,20 @@ class SignInController extends GetxController {
     }
   }
 
-  asyncPostData() async {
-    UserStore.to.setIsLogin = true;
+  asyncPostData(LoginRequestEntity loginRequestEntity) async {
+    EasyLoading.show(
+      indicator: const CircularProgressIndicator(),
+      maskType: EasyLoadingMaskType.clear,
+      dismissOnTap: true,
+    );
+    var response = await UserAPI.Login(params: loginRequestEntity);
+    if(response.code==0){
+      await UserStore.to.saveProfile(response.data!);
+      EasyLoading.dismiss();
+    }else{
+      EasyLoading.dismiss();
+      toastInfo(msg: "Internet Error");
+    }
     Get.offAllNamed(AppRoutes.Message);
   }
 }
