@@ -1,5 +1,5 @@
 // baidu yapi
- const SERVER_API_URL = 'https://foton.codemain.top/';
+ const SERVER_API_URL = 'http://10.0.2.2';
  const APPID = "e11666dd3c4346568b67b80823bcca50";
 
 //  yapi

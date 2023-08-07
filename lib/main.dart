@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foton/common/routes/pages.dart';
 import 'package:foton/common/style/style.dart';
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
               theme: AppTheme.light,
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
+              builder: EasyLoading.init(),
             ));
   }
 }
