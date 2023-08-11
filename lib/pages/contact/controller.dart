@@ -76,9 +76,28 @@ class ContactController extends GetxController {
 
       });
 
-      print(".... creating new document and adding user info done ....");
     }else{
-      print(".... users are older ....");
+      if(fromMessages.docs.first.id.isNotEmpty){
+        Get.toNamed("/chat",parameters: {
+          "doc_id": fromMessages.docs.first.id,
+          "to_token":contactItem.token??"",
+          "to_name":contactItem.name??"",
+          "to_avatar":contactItem.avatar??"",
+          "to_online":contactItem.online.toString(),
+
+        });
+      }
+
+      if(toMessages.docs.first.id.isNotEmpty){
+        Get.toNamed("/chat",parameters: {
+          "doc_id": toMessages.docs.first.id,
+          "to_token":contactItem.token??"",
+          "to_name":contactItem.name??"",
+          "to_avatar":contactItem.avatar??"",
+          "to_online":contactItem.online.toString(),
+
+        });
+      }
     }
   }
 
