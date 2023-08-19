@@ -77,7 +77,7 @@ class ContactController extends GetxController {
       });
 
     }else{
-      if(fromMessages.docs.first.id.isNotEmpty){
+      if(fromMessages.docs.isNotEmpty){
         Get.toNamed("/chat",parameters: {
           "doc_id": fromMessages.docs.first.id,
           "to_token":contactItem.token??"",
@@ -88,7 +88,7 @@ class ContactController extends GetxController {
         });
       }
 
-      if(toMessages.docs.first.id.isNotEmpty){
+      if(toMessages.docs.isNotEmpty){
         Get.toNamed("/chat",parameters: {
           "doc_id": toMessages.docs.first.id,
           "to_token":contactItem.token??"",

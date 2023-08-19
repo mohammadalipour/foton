@@ -1,6 +1,8 @@
 import 'package:foton/pages/message/chat/state.dart';
 import 'package:get/get.dart';
 
+import '../../../common/routes/names.dart';
+
 class ChatController extends GetxController {
   ChatController();
 
@@ -9,6 +11,17 @@ class ChatController extends GetxController {
 
   void goMore(){
     state.moreStatus.value = state.moreStatus.value? false : true;
+  }
+
+  void audioCall(){
+    state.moreStatus.value = false;
+    Get.toNamed(AppRoutes.VoiceCall,parameters: {
+      "to_token": state.toToken.value,
+      "to_name":state.toName.value,
+      "to_avatar":state.toAvatar.value,
+      "call_role": "anchor",
+      "doc_id": docId
+    });
   }
 
   @override
