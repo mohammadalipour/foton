@@ -1,5 +1,5 @@
 name: foton
-description: A new Flutter project.
+description: Foton  is a freeware, cross-platform, centralized instant messaging and voice-over-IP service.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -34,7 +34,7 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.5
 
   # GetX
   get: ^4.6.5
@@ -124,20 +124,26 @@ dependencies:
 
   flutter_verification_code: ^1.1.6
 
-  agora_rtc_engine: ^6.1.0
+  agora_rtc_engine: ^6.2.2
 
   just_audio: ^0.9.30
 
-  flutter_local_notifications: ^13.0.0
-
+  flutter_local_notifications: ^15.1.0+1
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
+
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
 
   flutter_lints: ^2.0.0
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/foton.png"
 
 flutter:
 
@@ -156,6 +162,7 @@ flutter:
     - assets/ding.mp3
     - assets/gif.gif
     - assets/jpg.jpg
+    - .env
 
   fonts:
     - family: Avenir

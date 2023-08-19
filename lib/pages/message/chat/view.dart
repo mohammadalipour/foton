@@ -88,7 +88,7 @@ class ChatPage extends GetView<ChatController> {
                                 padding: EdgeInsets.all(8.w),
                                 decoration: BoxDecoration(
                                     color: AppColors.primaryElement,
-                                    boxShadow: [
+                                    boxShadow: const [
                                       BoxShadow(
                                           color: Colors.grey,
                                           spreadRadius: 2,
@@ -98,6 +98,9 @@ class ChatPage extends GetView<ChatController> {
                                     borderRadius: BorderRadius.circular(40.w)),
                                 child: Image.asset("assets/icons/add.png"),
                               ),
+                              onTap: (){
+                                controller.goMore();
+                              },
                             ),
                           ],
                         ))),
@@ -142,7 +145,7 @@ class ChatPage extends GetView<ChatController> {
                                           color: Colors.grey.withOpacity(0.2),
                                           spreadRadius: 2,
                                           blurRadius: 2,
-                                          offset: Offset(1, 1))
+                                          offset: const Offset(1, 1))
                                     ]),
                                 child: Image.asset("assets/icons/photo.png"),
                               ),
@@ -165,7 +168,9 @@ class ChatPage extends GetView<ChatController> {
                                     ]),
                                 child: Image.asset("assets/icons/call.png"),
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                  controller.audioCall();
+                              },
                             ),
                             GestureDetector(
                               child: Container(

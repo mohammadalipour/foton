@@ -5,6 +5,7 @@ import '../../pages/frame/sign_in/index.dart';
 import '../../pages/profile/index.dart';
 import '../../pages/message/index.dart';
 import '../../pages/message/chat/index.dart';
+import '../../pages/message/voice_call/index.dart';
 import '../../pages/contact/index.dart';
 import '../middlewares/router_auth.dart';
 import 'routes.dart';
@@ -32,6 +33,7 @@ class AppPages {
     GetPage(name: AppRoutes.Profile, page: () => const ProfilePage(), binding: ProfileBinding()),
     GetPage(name: AppRoutes.Contact, page: () => const ContactPage(), binding: ContactBinding()),
     GetPage(name: AppRoutes.Chat, page: () => const ChatPage(), binding: ChatBinding()),
+    GetPage(name: AppRoutes.VoiceCall, page: () => const VoiceCallPage(), binding: VoiceCallBinding()),
 
     /*
     // GetPage(

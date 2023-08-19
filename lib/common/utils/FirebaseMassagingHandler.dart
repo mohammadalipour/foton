@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 import 'package:foton/common/apis/apis.dart';
 import 'package:foton/common/entities/entities.dart';
@@ -15,35 +14,35 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FirebaseMassagingHandler {
+import '../../firebase_options.dart';
 
-  FirebaseMassagingHandler._();
+class FirebaseMessagingHandler {
+
+  FirebaseMessagingHandler._();
   static AndroidNotificationChannel channel_call = const AndroidNotificationChannel(
-    'com.dbestech.foton.call', // id
+    'com.foton.call', // id
     'foton_call', // title
     importance: Importance.max,
     enableLights: true,
     playSound: true,
     sound: RawResourceAndroidNotificationSound('alert'),
+    enableVibration: true
   );
   static AndroidNotificationChannel channel_message = const AndroidNotificationChannel(
-    'com.dbestech.foton.message', // id
+    'com.foton.message', // id
     'foton_message', // title
     importance: Importance.defaultImportance,
     enableLights: true,
     playSound: true,
-   // sound: RawResourceAndroidNotificationSound('alert'),
+   sound: RawResourceAndroidNotificationSound('alert'),
   );
-
-
-
 
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static Future<void> config() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     try {
-      RemoteMessage newMessage = RemoteMessage();
+      // RemoteMessage newMessage = RemoteMessage();
       await messaging.requestPermission(
         sound: true,
         badge: true,
@@ -116,9 +115,10 @@ class FirebaseMassagingHandler {
                   GestureDetector(
                     onTap: (){
                       if(Get.isSnackbarOpen){
+                        print("Closssseee");
                         Get.closeAllSnackbars();
                       }
-                      FirebaseMassagingHandler._sendNotifications("cancel",to_token,to_avatar,to_name,doc_id);
+                      FirebaseMessagingHandler._sendNotifications("cancel",to_token,to_avatar,to_name,doc_id);
                     },
                     child: Container(
                       width: 40.w,
@@ -137,6 +137,7 @@ class FirebaseMassagingHandler {
                         if(Get.isSnackbarOpen){
                           Get.closeAllSnackbars();
                         }
+                        print("Injaaaaa");
                         Get.toNamed(AppRoutes.VoiceCall, parameters: {
                           "to_token": to_token,
                           "to_name": to_name,
@@ -163,14 +164,14 @@ class FirebaseMassagingHandler {
           }
 
         }else if(message.data["call_type"]=="video"){
-      //    FirebaseMassagingHandler.flutterLocalNotificationsPlugin.cancelAll();
+         flutterLocalNotificationsPlugin.cancelAll();
           //  ////1. voice 2. video 3. text, 4.cancel
             var data = message.data;
             var to_token = data["token"];
             var to_name = data["name"];
             var to_avatar = data["avatar"];
             var doc_id = data["doc_id"]??"";
-            // var call_role= data["call_type"];
+            var call_role= data["call_type"];
             if (to_token != null && to_name != null && to_avatar != null) {
               ConfigStore.to.isCallVocie = true;
               Get.snackbar(
@@ -196,7 +197,7 @@ class FirebaseMassagingHandler {
                         if(Get.isSnackbarOpen){
                           Get.closeAllSnackbars();
                         }
-                        FirebaseMassagingHandler._sendNotifications("cancel",to_token,to_avatar,to_name,doc_id);
+                        FirebaseMessagingHandler._sendNotifications("cancel",to_token,to_avatar,to_name,doc_id);
                       },
                       child: Container(
                         width: 40.w,
@@ -240,7 +241,7 @@ class FirebaseMassagingHandler {
             }
 
         }else if(message.data["call_type"]=="cancel"){
-              FirebaseMassagingHandler.flutterLocalNotificationsPlugin.cancelAll();
+              FirebaseMessagingHandler.flutterLocalNotificationsPlugin.cancelAll();
 
               if(Get.isSnackbarOpen){
                 Get.closeAllSnackbars();
@@ -252,11 +253,7 @@ class FirebaseMassagingHandler {
 
               var _prefs = await SharedPreferences.getInstance();
               await _prefs.setString("CallVocieOrVideo","");
-
         }
-
-
-
       }
 
   }
@@ -301,9 +298,9 @@ class FirebaseMassagingHandler {
             playSound: true,
             enableVibration: true,
             priority: Priority.defaultPriority,
-           // channelShowBadge: true,
+            channelShowBadge: true,
             importance: Importance.defaultImportance,
-           // sound: RawResourceAndroidNotificationSound('alert'),
+           sound: RawResourceAndroidNotificationSound('alert'),
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,
@@ -316,45 +313,39 @@ class FirebaseMassagingHandler {
     }
    // PlascoRequests().initReport();
   }
-/*
+
   @pragma('vm:entry-point')
   static Future<void> firebaseMessagingBackground(RemoteMessage message) async {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,);
     print("message data: ${message.data}");
     print("message data: ${message}");
     print("message data: ${message.notification}");
 
-    if(message!=null){
-      if(message.data!=null && message.data["call_type"]!=null) {
-
-        if(message.data["call_type"]=="cancel"){
-            FirebaseMassagingHandler.flutterLocalNotificationsPlugin.cancelAll();
+    if (message != null) {
+      if (message.data != null && message.data["call_type"] != null) {
+        if (message.data["call_type"] == "cancel") {
+          FirebaseMessagingHandler.flutterLocalNotificationsPlugin.cancelAll();
           //  await setCallVocieOrVideo(false);
-            var _prefs = await SharedPreferences.getInstance();
-            await _prefs.setString("CallVocieOrVideo", "");
+          var _prefs = await SharedPreferences.getInstance();
+          await _prefs.setString("CallVocieOrVideo", "");
         }
-        if(message.data["call_type"]=="voice" || message.data["call_type"]=="video"){
-
+        if (message.data["call_type"] == "voice" ||
+            message.data["call_type"] == "video") {
           var data = {
-            "to_token":message.data["token"],
-            "to_name":message.data["name"],
-            "to_avatar":message.data["avatar"],
-            "doc_id":message.data["doc_id"]??"",
-            "call_type":message.data["call_type"],
-            "expire_time":DateTime.now().toString(),
+            "to_token": message.data["token"],
+            "to_name": message.data["name"],
+            "to_avatar": message.data["avatar"],
+            "doc_id": message.data["doc_id"] ?? "",
+            "call_type": message.data["call_type"],
+            "expire_time": DateTime.now().toString(),
           };
           print(data);
           var _prefs = await SharedPreferences.getInstance();
           await _prefs.setString("CallVocieOrVideo", jsonEncode(data));
         }
-
-
       }
-
-
-
     }
-
-  }*/
+  }
 }
 

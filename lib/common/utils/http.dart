@@ -4,6 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:foton/common/store/store.dart';
 import 'package:foton/common/utils/utils.dart';
 import 'package:foton/common/values/values.dart';
@@ -21,7 +22,7 @@ class HttpUtil {
 
   HttpUtil._internal() {
     BaseOptions options = BaseOptions(
-      baseUrl: SERVER_API_URL,
+      baseUrl: dotenv.env['SERVER_API_URL']!,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 5),
       headers: {},

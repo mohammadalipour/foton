@@ -61,7 +61,7 @@ class SignInPage extends GetView<SignInController> {
         ),
       ),
       onTap: (){
-        controller.handleSignIn('Google');
+        controller.handleSignIn(loginType);
       }
     );
   }
