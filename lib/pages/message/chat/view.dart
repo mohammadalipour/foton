@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:foton/common/values/colors.dart';
+import 'package:foton/pages/message/chat/widgets/chat_list.dart';
 import 'package:get/get.dart';
 
 import 'controller.dart';
@@ -16,6 +17,7 @@ class ChatPage extends GetView<ChatController> {
       body: Obx(() => SafeArea(
             child: Stack(
               children: [
+                ChatList(),
                 Positioned(
                     bottom: 0.h,
                     child: Container(
@@ -37,7 +39,12 @@ class ChatPage extends GetView<ChatController> {
                               child: Row(children: [
                                 Container(
                                     width: 220.w,
-                                    child: TextField(
+                                    constraints: BoxConstraints(
+                                            maxHeight: 170.h,
+                                            minHeight: 30.h
+                                        ),
+                                        child: TextField(
+                                        controller: controller.myInputController,
                                         keyboardType: TextInputType.multiline,
                                         autofocus: false,
                                         decoration: InputDecoration(
@@ -76,7 +83,7 @@ class ChatPage extends GetView<ChatController> {
                                     child: Image.asset("assets/icons/send.png"),
                                   ),
                                   onTap: () {
-                                    controller.goMore();
+                                    controller.sendMessage();
                                   },
                                 )
                               ]),
@@ -149,7 +156,8 @@ class ChatPage extends GetView<ChatController> {
                                     ]),
                                 child: Image.asset("assets/icons/photo.png"),
                               ),
-                              onTap: () {},
+                              onTap: () {
+                              },
                             ),
                             GestureDetector(
                               child: Container(
