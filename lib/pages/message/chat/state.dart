@@ -8,4 +8,5 @@ class ChatState {
   var toAvatar = "".obs;
   var toOnline = "".obs;
   RxBool moreStatus = false.obs;
+  RxBool isLoading = false.obs;
 }

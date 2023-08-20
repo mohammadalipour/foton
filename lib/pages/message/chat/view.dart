@@ -17,7 +17,7 @@ class ChatPage extends GetView<ChatController> {
       body: Obx(() => SafeArea(
             child: Stack(
               children: [
-                ChatList(),
+                const ChatList(),
                 Positioned(
                     bottom: 0.h,
                     child: Container(
@@ -40,11 +40,10 @@ class ChatPage extends GetView<ChatController> {
                                 Container(
                                     width: 220.w,
                                     constraints: BoxConstraints(
-                                            maxHeight: 170.h,
-                                            minHeight: 30.h
-                                        ),
-                                        child: TextField(
-                                        controller: controller.myInputController,
+                                        maxHeight: 170.h, minHeight: 30.h),
+                                    child: TextField(
+                                        controller: controller
+                                            .myInputController,
                                         keyboardType: TextInputType.multiline,
                                         autofocus: false,
                                         decoration: InputDecoration(
@@ -105,7 +104,7 @@ class ChatPage extends GetView<ChatController> {
                                     borderRadius: BorderRadius.circular(40.w)),
                                 child: Image.asset("assets/icons/add.png"),
                               ),
-                              onTap: (){
+                              onTap: () {
                                 controller.goMore();
                               },
                             ),
@@ -156,8 +155,7 @@ class ChatPage extends GetView<ChatController> {
                                     ]),
                                 child: Image.asset("assets/icons/photo.png"),
                               ),
-                              onTap: () {
-                              },
+                              onTap: () {},
                             ),
                             GestureDetector(
                               child: Container(
@@ -177,7 +175,7 @@ class ChatPage extends GetView<ChatController> {
                                 child: Image.asset("assets/icons/call.png"),
                               ),
                               onTap: () {
-                                  controller.audioCall();
+                                controller.audioCall();
                               },
                             ),
                             GestureDetector(

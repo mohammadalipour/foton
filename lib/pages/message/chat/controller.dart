@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:foton/common/entities/entities.dart';
 import 'package:foton/common/store/store.dart';
 import 'package:foton/pages/message/chat/state.dart';
@@ -16,6 +17,9 @@ class ChatController extends GetxController {
   final token = UserStore.to.profile.token;
   final db = FirebaseFirestore.instance;
   var listener;
+  var isLoadMore = true;
+
+  ScrollController myScrollController = ScrollController();
 
   void goMore() {
     state.moreStatus.value = state.moreStatus.value ? false : true;
@@ -49,6 +53,7 @@ class ChatController extends GetxController {
     super.onClose();
     listener.cancel();
     myInputController.dispose();
+    myScrollController.dispose();
   }
 
   @override
@@ -62,15 +67,15 @@ class ChatController extends GetxController {
         .withConverter(
             fromFirestore: Msgcontent.fromFirestore,
             toFirestore: (Msgcontent msg, options) => msg.toFirestore())
-        .orderBy("added_time", descending: true)
+        .orderBy("addtime", descending: true)
         .limit(15);
 
     listener = messages.snapshots().listen((event) {
       List<Msgcontent> tempMsgList = <Msgcontent>[];
-      for (var change in event.docChanges){
+      for (var change in event.docChanges) {
         switch (change.type) {
           case DocumentChangeType.added:
-            if(change.doc.data()!=null){
+            if (change.doc.data() != null) {
               tempMsgList.add(change.doc.data()!);
             }
             break;
@@ -80,15 +85,53 @@ class ChatController extends GetxController {
             break;
         }
       }
-      tempMsgList.reversed.forEach((element){
+      tempMsgList.reversed.forEach((element) {
         state.msgContentList.value.insert(0, element);
       });
-
       state.msgContentList.refresh();
-
-
+      if (myScrollController.hasClients) {
+        myScrollController.animateTo(
+            myScrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut);
+      }
     });
 
+    myScrollController.addListener(() {
+      if(myScrollController.offset+20 > myScrollController.position.maxScrollExtent){
+        if(isLoadMore){
+          state.isLoading.value = true;
+          isLoadMore = false;
+          asyncLoadMoreData();
+        }
+      }
+    });
+  }
+
+  Future<void> asyncLoadMoreData() async {
+    final messages = await db
+        .collection("message")
+        .doc(docId)
+        .collection("msg_list")
+        .withConverter(
+            fromFirestore: Msgcontent.fromFirestore,
+            toFirestore: (Msgcontent msg, options) => msg.toFirestore())
+        .orderBy("addtime", descending: true)
+        .where("addtime", isLessThan: state.msgContentList.value.last.addtime)
+        .limit(10)
+        .get();
+
+    if (messages.docs.isNotEmpty) {
+      messages.docs.forEach((element) {
+        var data = element.data();
+        state.msgContentList.add(data);
+      });
+    }
+
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      isLoadMore = true;
+    });
+    state.isLoading.value = false;
   }
 
   Future<void> sendMessage() async {
