@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../common/entities/msgcontent.dart';
@@ -37,7 +38,15 @@ Widget ChatLeftList(Msgcontent item) {
                       color: AppColors.primaryElementText
                   ),
                 )
-                    : Text("image"),
+                    : ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 90.w),
+                  child: GestureDetector(
+                    child: CachedNetworkImage(imageUrl: item.content!),
+                    onTap: (){
+
+                    },
+                  ),
+                ),
               )
             ],
           ),
