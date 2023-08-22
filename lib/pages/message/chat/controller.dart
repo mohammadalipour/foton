@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:foton/common/apis/apis.dart';
 import 'package:foton/common/entities/entities.dart';
 import 'package:foton/common/store/store.dart';
+import 'package:foton/common/widgets/toast.dart';
 import 'package:foton/pages/message/chat/state.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../common/routes/names.dart';
 
@@ -18,6 +23,8 @@ class ChatController extends GetxController {
   final db = FirebaseFirestore.instance;
   var listener;
   var isLoadMore = true;
+  File? _photo;
+  final ImagePicker _picker = ImagePicker();
 
   ScrollController myScrollController = ScrollController();
 
@@ -54,6 +61,26 @@ class ChatController extends GetxController {
     listener.cancel();
     myInputController.dispose();
     myScrollController.dispose();
+  }
+
+  Future imgFromGallery() async {
+    final pickFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickFile != null) {
+      _photo = File(pickFile.path);
+      uploadFile();
+    } else {
+      print("No image selected");
+    }
+  }
+
+  Future uploadFile() async {
+    var result = await ChatAPI.upload_img(file: _photo);
+    print(result.data);
+    if (result.code == 0) {
+      sendImageMessage(result.data!);
+    } else {
+      toastInfo(msg: "Sending image error");
+    }
   }
 
   @override
@@ -98,8 +125,9 @@ class ChatController extends GetxController {
     });
 
     myScrollController.addListener(() {
-      if(myScrollController.offset+20 > myScrollController.position.maxScrollExtent){
-        if(isLoadMore){
+      if (myScrollController.offset + 20 >
+          myScrollController.position.maxScrollExtent) {
+        if (isLoadMore) {
           state.isLoading.value = true;
           isLoadMore = false;
           asyncLoadMoreData();
@@ -176,6 +204,47 @@ class ChatController extends GetxController {
         "to_msg_num": toMessageNum,
         "from_msg_num": fromMessageNum,
         "last_msg": sendContent,
+        "last_time": Timestamp.now(),
+      });
+    }
+  }
+
+  Future<void> sendImageMessage(String url) async {
+    final content = Msgcontent(
+        token: token, content: url, type: "image", addtime: Timestamp.now());
+
+    await db
+        .collection("message")
+        .doc(docId)
+        .collection("msg_list")
+        .withConverter(
+            fromFirestore: Msgcontent.fromFirestore,
+            toFirestore: (Msgcontent msg, options) => msg.toFirestore())
+        .add(content)
+        .then((DocumentReference doc) {});
+
+    var messageResult = await db
+        .collection("message")
+        .doc(docId)
+        .withConverter(
+            fromFirestore: Msg.fromFirestore,
+            toFirestore: (Msg msg, options) => msg.toFirestore())
+        .get();
+
+    if (messageResult.data() != null) {
+      var item = messageResult.data()!;
+      int toMessageNum = item.to_msg_num == null ? 0 : item.to_msg_num!;
+      int fromMessageNum = item.to_msg_num == null ? 0 : item.from_msg_num!;
+      if (item.from_token == token) {
+        fromMessageNum = fromMessageNum + 1;
+      } else {
+        toMessageNum = toMessageNum + 1;
+      }
+
+      await db.collection("message").doc(docId).update({
+        "to_msg_num": toMessageNum,
+        "from_msg_num": fromMessageNum,
+        "last_msg":  "[image]",
         "last_time": Timestamp.now(),
       });
     }
