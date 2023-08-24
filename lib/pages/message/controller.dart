@@ -5,13 +5,14 @@ import 'package:foton/pages/message/state.dart';
 import 'package:get/get.dart';
 
 import '../../common/apis/chat.dart';
+import '../../common/store/user.dart';
 
 class MessageController extends GetxController {
   MessageController();
   final state = MessageState();
 
   Future<void> goProfile() async {
-    await Get.toNamed(AppRoutes.Profile);
+    await Get.toNamed(AppRoutes.Profile,arguments: state.head_detail.value);
   }
 
   @override
@@ -28,5 +29,18 @@ class MessageController extends GetxController {
       bindFcmTokenRequestEntity.fcmtoken = fcmToken;
       await ChatAPI.bind_fcmtoken(params: bindFcmTokenRequestEntity);
     }
+  }
+
+  @override
+  void onInit(){
+    super.onInit();
+    getProfile();
+  }
+
+
+  void getProfile() async{
+    var profile = await UserStore.to.profile;
+    state.head_detail.value = profile;
+    state.head_detail.refresh();
   }
 }
