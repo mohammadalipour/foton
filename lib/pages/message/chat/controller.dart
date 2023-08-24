@@ -244,9 +244,14 @@ class ChatController extends GetxController {
       await db.collection("message").doc(docId).update({
         "to_msg_num": toMessageNum,
         "from_msg_num": fromMessageNum,
-        "last_msg":  "[image]",
+        "last_msg": "[image]",
         "last_time": Timestamp.now(),
       });
     }
+  }
+
+  void closeAllPop() async {
+    Get.focusScope?.unfocus();
+    state.moreStatus.value = false;
   }
 }
