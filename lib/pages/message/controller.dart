@@ -30,7 +30,6 @@ class MessageController extends GetxController {
 
   firebaseMessageSetup() async {
     String? fcmToken = await FirebaseMessaging.instance.getToken();
-    print("... my device token is $fcmToken");
     if (fcmToken != null) {
       BindFcmTokenRequestEntity bindFcmTokenRequestEntity =
       BindFcmTokenRequestEntity();
@@ -66,11 +65,9 @@ class MessageController extends GetxController {
   }
 
   asyncLoadMsgData() async {
-    print("-----------state.msgList.value");
-    print(state.msgList.value);
     var token = UserStore.to.profile.token;
 
-    var from_messages = await db
+    var fromMessages = await db
         .collection("message")
         .withConverter(
       fromFirestore: Msg.fromFirestore,
@@ -78,9 +75,8 @@ class MessageController extends GetxController {
     )
         .where("from_token", isEqualTo: token)
         .get();
-    print(from_messages.docs.length);
 
-    var to_messages = await db
+    var toMessages = await db
         .collection("message")
         .withConverter(
       fromFirestore: Msg.fromFirestore,
@@ -88,15 +84,13 @@ class MessageController extends GetxController {
     )
         .where("to_token", isEqualTo: token)
         .get();
-    print("to_messages.docs.length------------");
-    print(to_messages.docs.length);
     state.msgList.clear();
 
-    if (from_messages.docs.isNotEmpty) {
-      await addMessage(from_messages.docs);
+    if (fromMessages.docs.isNotEmpty) {
+      await addMessage(fromMessages.docs);
     }
-    if (to_messages.docs.isNotEmpty) {
-      await addMessage(to_messages.docs);
+    if (toMessages.docs.isNotEmpty) {
+      await addMessage(toMessages.docs);
     }
     // sort
     state.msgList.value.sort((a, b) {
@@ -112,8 +106,6 @@ class MessageController extends GetxController {
 
   _snapshots() async {
     var token = UserStore.to.profile.token;
-    print("token--------");
-    print(token);
 
     final toMessageRef = db
         .collection("message")
@@ -131,22 +123,16 @@ class MessageController extends GetxController {
         .where("from_token", isEqualTo: token);
     toMessageRef.snapshots().listen(
           (event) async {
-        print("snapshotslisten-----------");
-        print(event.metadata.isFromCache);
         await asyncLoadMsgData();
         // if(!event.metadata.isFromCache){
         //
         // }
-        print("snapshotslisten-----------");
       },
       onError: (error) => print("Listen failed: $error"),
     );
     fromMessageRef.snapshots().listen(
           (event) async {
-        print("snapshotslisten-----------");
-        print(event.metadata.isFromCache);
         await asyncLoadMsgData();
-        print("snapshotslisten-----------");
       },
       onError: (error) => print("Listen failed: $error"),
     );
