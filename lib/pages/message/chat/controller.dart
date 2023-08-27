@@ -53,6 +53,7 @@ class ChatController extends GetxController {
     state.toName.value = data['to_name'] ?? "";
     state.toAvatar.value = data['to_avatar'] ?? "";
     state.toOnline.value = data['to_online'] ?? "1";
+    clearMsgNum(docId);
   }
 
   @override
@@ -61,6 +62,7 @@ class ChatController extends GetxController {
     listener.cancel();
     myInputController.dispose();
     myScrollController.dispose();
+    clearMsgNum(docId);
   }
 
   Future imgFromGallery() async {
@@ -253,5 +255,31 @@ class ChatController extends GetxController {
   void closeAllPop() async {
     Get.focusScope?.unfocus();
     state.moreStatus.value = false;
+  }
+
+  void clearMsgNum(String docId)async {
+    var messageResult = await db
+        .collection("message")
+        .doc(docId)
+        .withConverter(
+        fromFirestore: Msg.fromFirestore,
+        toFirestore: (Msg msg, options) => msg.toFirestore())
+        .get();
+
+    if (messageResult.data() != null) {
+      var item = messageResult.data()!;
+      int toMessageNum = item.to_msg_num == null ? 0 : item.to_msg_num!;
+      int fromMessageNum = item.to_msg_num == null ? 0 : item.from_msg_num!;
+      if (item.from_token == token) {
+        toMessageNum = 0;
+      } else {
+        fromMessageNum = 0;
+      }
+
+      await db.collection("message").doc(docId).update({
+        "to_msg_num": toMessageNum,
+        "from_msg_num": fromMessageNum,
+      });
+    }
   }
 }
