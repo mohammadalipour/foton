@@ -197,7 +197,9 @@ class ChatPage extends GetView<ChatController> {
                                     ]),
                                 child: Image.asset("assets/icons/video.png"),
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                controller.videoCall();
+                              },
                             ),
                           ],
                         ))

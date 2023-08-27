@@ -10,6 +10,7 @@ import 'package:foton/common/widgets/toast.dart';
 import 'package:foton/pages/message/chat/state.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../common/routes/names.dart';
 
@@ -41,6 +42,46 @@ class ChatController extends GetxController {
       "call_role": "anchor",
       "doc_id": docId
     });
+  }
+  void videoCall() async{
+    state.moreStatus.value = false;
+    bool micStatus = await requestPermission(Permission.microphone);
+    bool cameraStatus = await requestPermission(Permission.camera);
+
+    if(GetPlatform.isAndroid && micStatus && cameraStatus){
+      Get.toNamed(AppRoutes.VideoCall, parameters: {
+        "to_token": state.toToken.value,
+        "to_name": state.toName.value,
+        "to_avatar": state.toAvatar.value,
+        "call_role": "anchor",
+        "doc_id": docId
+      });
+    }else{
+      Get.toNamed(AppRoutes.VideoCall, parameters: {
+        "to_token": state.toToken.value,
+        "to_name": state.toName.value,
+        "to_avatar": state.toAvatar.value,
+        "call_role": "anchor",
+        "doc_id": docId
+      });
+    }
+  }
+
+  Future<bool> requestPermission(Permission permission) async{
+    var permissionStatus = await permission.status;
+    if(permissionStatus != permission.status.isGranted){
+      var status = await permission.request();
+      if(status != permissionStatus){
+        toastInfo(msg: "Please enable permission have video call");
+        if(GetPlatform.isAndroid){
+          await openAppSettings();
+        }
+        return false;
+
+      }
+    }
+
+    return true;
   }
 
   @override
