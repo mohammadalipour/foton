@@ -28,10 +28,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  flutter:
+
+
+  flutter_localizations:
     sdk: flutter
-
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
@@ -40,16 +40,16 @@ dependencies:
   get: ^4.6.5
 
   # date
-  intl: ^0.17.0
+  intl: ^0.18.1
 
   # device ui resizing
-  flutter_screenutil: ^5.3.1
+  flutter_screenutil: ^5.9.0
 
   # pull to refresh
   pull_to_refresh: ^2.0.0
 
   # toast
-  fluttertoast: ^8.0.9
+  fluttertoast: ^8.2.2
 
   # easyloading
   flutter_easyloading: ^3.0.5
@@ -60,15 +60,15 @@ dependencies:
   cookie_jar: ^4.0.8
 
   # local storage
-  shared_preferences: ^2.0.13
-  cached_network_image: ^3.2.0
-  flutter_cache_manager: ^3.3.0
+  shared_preferences: ^2.2.0
+  cached_network_image: ^3.2.3
+  flutter_cache_manager: ^3.3.1
 
   # encrypting SHA
   crypto: ^3.0.1
 
   # webView
-  webview_flutter: ^4.0.0
+  webview_flutter: ^4.2.3
 
   # loading
   loading_animations: ^2.2.0
@@ -86,7 +86,7 @@ dependencies:
   path_provider: ^2.0.9
 
   # permission
-  permission_handler: ^10.2.0
+  permission_handler: ^10.4.3
 
   # about errors
   sentry: ^6.3.0
@@ -95,24 +95,24 @@ dependencies:
   uni_links: ^0.5.1
 
   #animation library
-  flutter_spinkit: ^5.1.0
+  flutter_spinkit: ^5.2.0
 
 
-  dots_indicator: ^2.1.0
+  dots_indicator: ^3.0.0
 
-  google_sign_in: ^5.3.3
+  google_sign_in: ^6.1.4
 
-  firebase_core: ^2.4.0
+  firebase_core: ^2.15.1
 
-  firebase_messaging: ^14.6.5
+  firebase_messaging: ^14.6.7
 
-  firebase_in_app_messaging: ^0.7.0+8
+  firebase_in_app_messaging: ^0.7.3+5
 
-  firebase_auth: ^4.2.1
+  firebase_auth: ^4.8.0
 
-  cloud_firestore: ^4.2.0
+  cloud_firestore: ^4.9.0
 
-  firebase_storage: ^11.0.8
+  firebase_storage: ^11.2.6
 
   location: ^5.0.1
 
@@ -120,15 +120,15 @@ dependencies:
 
   photo_view: ^0.14.0
 
-  sqflite: ^2.0.3+1
+  sqflite: ^2.3.0
 
   flutter_verification_code: ^1.1.6
 
   agora_rtc_engine: ^6.2.2
 
-  just_audio: ^0.9.30
+  just_audio: ^0.9.34
 
-  flutter_local_notifications: ^15.1.0+1
+  flutter_local_notifications: ^15.1.1
   flutter_dotenv: ^5.1.0
 
 dev_dependencies:

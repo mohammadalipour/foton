@@ -8,7 +8,7 @@ import 'package:foton/common/style/style.dart';
 import 'package:foton/common/utils/FirebaseMassagingHandler.dart';
 import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'global.dart';
 
 Future<void> main() async {
@@ -46,6 +46,11 @@ class MyApp extends StatelessWidget {
               initialRoute: AppPages.INITIAL,
               getPages: AppPages.routes,
               builder: EasyLoading.init(),
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
             ));
   }
 }
