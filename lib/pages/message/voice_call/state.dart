@@ -6,6 +6,7 @@ class VoiceCallState {
   RxBool enableSpeaker = true.obs;
   RxString callTime = "00:00".obs;
   RxString callTimeStatus = "not connected".obs;
+  RxString callTimeNum = "not connected".obs;
 
   var toToken = "".obs;
   var toName = "".obs;
