@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -24,6 +25,10 @@ class VoiceCallController extends GetxController {
   final db = FirebaseFirestore.instance;
   final profileToken = UserStore.to.profile.token;
   late final RtcEngine engine;
+  int callSecond = 0;
+  int callMinute = 0;
+  int callHour = 0;
+  late final Timer callTimer;
   ChannelMediaOptions options = const ChannelMediaOptions(
     clientRoleType: ClientRoleType.clientRoleBroadcaster,
     channelProfile: ChannelProfileType.channelProfileCommunication,
@@ -58,6 +63,7 @@ class VoiceCallController extends GetxController {
     }, onUserJoined:
             (RtcConnection connection, int remoteUid, int elasped) async {
       await player.pause();
+      callTime();
     }, onLeaveChannel: (RtcConnection connection, RtcStats stats) {
       print("... user left the room ...");
       state.isJoined.value = false;
@@ -168,5 +174,26 @@ class VoiceCallController extends GetxController {
   void dispose() {
     _dispose();
     super.dispose();
+  }
+
+  void callTime() {
+    callTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      callSecond = callSecond + 1;
+      if(callSecond >= 60){
+        callSecond =0;
+        callMinute = callMinute + 1;
+      }
+      if(callMinute >= 60){
+        callMinute =0;
+        callHour = callHour + 1;
+      }
+      var hour = callHour < 10 ? "0$callHour" : "$callHour";
+      var minute = callMinute < 10 ? "0$callMinute" : "$callMinute";
+      var second = callSecond < 10 ? "0$callSecond" : "$callSecond";
+      if(callHour==0){
+        state.callTime.value = "$hour:$minute:$second";
+        state.callTimeNum.value = "$callHour and $callMinute minute and $callSecond second";
+      }
+    });
   }
 }

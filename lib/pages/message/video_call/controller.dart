@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:foton/common/apis/apis.dart';
-import 'package:foton/common/entities/chat.dart';
+import 'package:foton/common/entities/entities.dart';
 import 'package:foton/common/store/store.dart';
 import 'package:foton/pages/message/video_call/state.dart';
 import 'package:get/get.dart';
@@ -53,7 +53,8 @@ class VideoCallController extends GetxController {
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           state.isJoined.value = true;
         },
-        onUserJoined: (RtcConnection connection, int remoteUid, int elasped) async {
+        onUserJoined:
+            (RtcConnection connection, int remoteUid, int elasped) async {
           state.onRemoteUID.value = remoteUid;
           state.isShowAvatar.value = false;
           await player.pause();
@@ -63,17 +64,13 @@ class VideoCallController extends GetxController {
           state.onRemoteUID.value = 0;
           state.isShowAvatar.value = true;
         },
-        onRtcStats: (RtcConnection connection, RtcStats state) {
-        }));
+        onRtcStats: (RtcConnection connection, RtcStats state) {}));
 
     await engine.enableVideo();
-    await engine.setVideoEncoderConfiguration(
-      const VideoEncoderConfiguration(
-        dimensions: VideoDimensions(width: 640,height: 360),
+    await engine.setVideoEncoderConfiguration(const VideoEncoderConfiguration(
+        dimensions: VideoDimensions(width: 640, height: 360),
         frameRate: 15,
-        bitrate: 0
-      )
-    );
+        bitrate: 0));
     await engine.startPreview();
     state.isReadyPreview.value = true;
     await joinChannel();
@@ -90,7 +87,6 @@ class VideoCallController extends GetxController {
     callTokenRequestEntity.to_avatar = state.toAvatar.value;
     callTokenRequestEntity.doc_id = state.docId.value;
     callTokenRequestEntity.to_name = state.toName.value;
-    print(".... the other user token is : ${state.toToken.value}");
 
     var res = await ChatAPI.call_notifications(params: callTokenRequestEntity);
     if (res.code == 0) {
@@ -125,7 +121,7 @@ class VideoCallController extends GetxController {
   }
 
   Future<void> joinChannel() async {
-    await [Permission.microphone,Permission.camera].request();
+    await [Permission.microphone, Permission.camera].request();
     EasyLoading.show(
         indicator: CircularProgressIndicator(),
         maskType: EasyLoadingMaskType.clear,
@@ -160,12 +156,15 @@ class VideoCallController extends GetxController {
     Get.back();
   }
 
-  Future<void> switchCamera() async{
+  Future<void> switchCamera() async {
     await engine.switchCamera();
     state.switchCamera.value = !state.switchCamera.value;
   }
 
   Future<void> _dispose() async {
+    if (state.callRole == "anchor") {
+      addCallTime();
+    }
     await player.pause();
     await engine.leaveChannel();
     await engine.release();
@@ -182,5 +181,75 @@ class VideoCallController extends GetxController {
   void dispose() {
     _dispose();
     super.dispose();
+  }
+
+  void addCallTime() async {
+    var profile = UserStore.to.profile;
+    var msgData = ChatCall(
+        from_token: profile.token,
+        to_token: state.toToken.value,
+        from_name: profile.name,
+        to_name: state.toToken.value,
+        from_avatar: profile.avatar,
+        to_avatar: state.toAvatar.value,
+        call_time: state.callTimeNum.value.toString(),
+        last_time: Timestamp.now(),
+        type: "video");
+
+    await db
+        .collection("chatCall")
+        .withConverter(
+            fromFirestore: ChatCall.fromFirestore,
+            toFirestore: (ChatCall msg, options) => msg.toFirestore())
+        .add(msgData);
+    String sendContent = "Video call time ${state.callTimeNum.value}";
+
+    saveMessage(sendContent);
+  }
+
+  void saveMessage(String sendContent) async {
+    if (state.docId.value.isEmpty) {
+      return;
+    }
+    final content = Msgcontent(
+        token: profileToken,
+        content: sendContent,
+        type: "text",
+        addtime: Timestamp.now());
+
+    await db
+        .collection("message")
+        .doc(state.docId.value)
+        .collection("msg_list")
+        .withConverter(
+            fromFirestore: Msgcontent.fromFirestore,
+            toFirestore: (Msgcontent msgContent, options) =>
+                msgContent.toFirestore())
+        .add(content);
+
+    var messageResult = await db
+        .collection("message")
+        .doc(state.docId.value)
+        .withConverter(
+            fromFirestore: Msg.fromFirestore,
+            toFirestore: (Msg msg, options) => msg.toFirestore())
+        .get();
+
+    if (messageResult.data() != null) {
+      var item = messageResult.data()!;
+      int toMessageNum = item.to_msg_num == null ? 0 : item.to_msg_num!;
+      int fromMsgNum = item.from_msg_num == null ? 0 : item.from_msg_num!;
+      if (item.from_token == profileToken) {
+        fromMsgNum = fromMsgNum + 1;
+      } else {
+        toMessageNum = toMessageNum + 1;
+      }
+      await db.collection("message").doc(state.docId.value).update({
+        "to_msg_num": toMessageNum,
+        "from_msg_num": fromMsgNum,
+        "last_msg": sendContent,
+        "last_time": Timestamp.now()
+      });
+    }
   }
 }
