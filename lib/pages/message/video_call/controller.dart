@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
@@ -23,6 +24,10 @@ class VideoCallController extends GetxController {
   final db = FirebaseFirestore.instance;
   final profileToken = UserStore.to.profile.token;
   late final RtcEngine engine;
+  int callSecond = 0;
+  int callMinute = 0;
+  int callHour = 0;
+  late final Timer callTimer;
   ChannelMediaOptions options = const ChannelMediaOptions(
     clientRoleType: ClientRoleType.clientRoleBroadcaster,
     channelProfile: ChannelProfileType.channelProfileCommunication,
@@ -58,6 +63,7 @@ class VideoCallController extends GetxController {
           state.onRemoteUID.value = remoteUid;
           state.isShowAvatar.value = false;
           await player.pause();
+          callTime();
         },
         onLeaveChannel: (RtcConnection connection, RtcStats stats) {
           state.isJoined.value = false;
@@ -123,7 +129,7 @@ class VideoCallController extends GetxController {
   Future<void> joinChannel() async {
     await [Permission.microphone, Permission.camera].request();
     EasyLoading.show(
-        indicator: CircularProgressIndicator(),
+        indicator: const CircularProgressIndicator(),
         maskType: EasyLoadingMaskType.clear,
         dismissOnTap: true);
 
@@ -144,7 +150,7 @@ class VideoCallController extends GetxController {
 
   Future<void> leaveChannel() async {
     EasyLoading.show(
-        indicator: CircularProgressIndicator(),
+        indicator: const CircularProgressIndicator(),
         maskType: EasyLoadingMaskType.clear,
         dismissOnTap: true);
 
@@ -162,6 +168,9 @@ class VideoCallController extends GetxController {
   }
 
   Future<void> _dispose() async {
+    if (callTimer != null) {
+      callTimer.cancel();
+    }
     if (state.callRole == "anchor") {
       addCallTime();
     }
@@ -169,6 +178,28 @@ class VideoCallController extends GetxController {
     await engine.leaveChannel();
     await engine.release();
     await player.stop();
+  }
+
+  void callTime() {
+    callTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      callSecond = callSecond + 1;
+      if (callSecond >= 60) {
+        callSecond = 0;
+        callMinute = callMinute + 1;
+      }
+      if (callMinute >= 60) {
+        callMinute = 0;
+        callHour = callHour + 1;
+      }
+      var hour = callHour < 10 ? "0$callHour" : "$callHour";
+      var minute = callMinute < 10 ? "0$callMinute" : "$callMinute";
+      var second = callSecond < 10 ? "0$callSecond" : "$callSecond";
+      if (callHour == 0) {
+        state.callTime.value = "$hour:$minute:$second";
+        state.callTimeNum.value =
+        "$callHour and $callMinute minute and $callSecond second";
+      }
+    });
   }
 
   @override
@@ -197,13 +228,12 @@ class VideoCallController extends GetxController {
         type: "video");
 
     await db
-        .collection("chatCall")
+        .collection("chat_call")
         .withConverter(
             fromFirestore: ChatCall.fromFirestore,
             toFirestore: (ChatCall msg, options) => msg.toFirestore())
         .add(msgData);
     String sendContent = "Video call time ${state.callTimeNum.value}";
-
     saveMessage(sendContent);
   }
 

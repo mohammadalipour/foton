@@ -340,9 +340,16 @@ class MessagePage extends GetView<MessageController> {
                           var item = controller.state.msgList[index];
                           return _chatListItem(item);
                         }, childCount: controller.state.msgList.length))
-                      : SliverToBoxAdapter(
-                          child: Container(),
-                        ),
+                      : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (content, index) {
+                          var item = controller.state.callList[index];
+                          print("injaaaa:${item}");
+                          //controller.state.msgList.length
+                          return _callListItem(item);
+                        },
+                        childCount: controller.state.callList.length,
+                      )),
                 )
               ]),
               Positioned(
@@ -373,6 +380,142 @@ class MessagePage extends GetView<MessageController> {
                   ))
             ],
           ))),
+    );
+  }
+
+  Widget _callListItem(CallMessage item) {
+    print("_call list ");
+    return Container(
+      padding: EdgeInsets.only(top: 10.h, left: 0.w, right: 0.w, bottom: 10.h),
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+                  width: 1, color: AppColors.primarySecondaryBackground))),
+      child: InkWell(
+          onTap: () {},
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 44.w,
+                height: 44.w,
+                margin: EdgeInsets.only(top: 0.h, left: 0.w, right: 10.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySecondaryBackground,
+                  borderRadius: BorderRadius.all(Radius.circular(22.w)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 1), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: item.avatar == null
+                    ? Image(
+                  image: AssetImage('assets/images/account_header.png'),
+                )
+                    : CachedNetworkImage(
+                  imageUrl: item.avatar!,
+                  height: 44.w,
+                  width: 44.w,
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                      BorderRadius.all(Radius.circular(22.w)),
+                      image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.fill
+                        // colorFilter: ColorFilter.mode(Colors.red, BlendMode.colorBurn),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Image(
+                    image: AssetImage('assets/images/account_header.png'),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    top: 0.w, left: 0.w, right: 0.w, bottom: 0.w),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    // center
+                    SizedBox(
+                        width: 175.w,
+                        height: 44.w,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                "${item.name}",
+                                overflow: TextOverflow.clip,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.thirdElement,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                              Text(
+                                "${item.call_time}",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.normal,
+                                  color: AppColors.primarySecondaryElementText,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ])),
+                    SizedBox(
+                        width: 85.w,
+                        height: 44.w,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                item.last_time == null
+                                    ? ""
+                                    : duTimeLineFormat(
+                                    (item.last_time as Timestamp).toDate()),
+                                textAlign: TextAlign.end,
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.normal,
+                                  color: AppColors.thirdElementText,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                              Text(
+                                item.type == null ? "" : "${item.type}",
+                                textAlign: TextAlign.end,
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontFamily: 'Avenir',
+                                  fontWeight: FontWeight.normal,
+                                  color: AppColors.thirdElementText,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ])),
+                  ],
+                ),
+              ),
+            ],
+          )),
     );
   }
 }

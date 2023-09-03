@@ -15,6 +15,9 @@ import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../common/entities/chatcall.dart';
+import '../../../common/entities/msg.dart';
+import '../../../common/entities/msgcontent.dart';
 
 class VoiceCallController extends GetxController {
   VoiceCallController();
@@ -33,6 +36,7 @@ class VoiceCallController extends GetxController {
     clientRoleType: ClientRoleType.clientRoleBroadcaster,
     channelProfile: ChannelProfileType.channelProfileCommunication,
   );
+  bool isCallTimer = false;
 
   @override
   void onInit() {
@@ -40,9 +44,9 @@ class VoiceCallController extends GetxController {
     var data = Get.parameters;
     state.toName.value = data['to_name'] ?? "";
     state.toAvatar.value = data['to_avatar'] ?? "";
-    state.callRole.value = data['call_role']?? "";
-    state.docId.value = data['doc_id']?? "";
-    state.toToken.value = data['to_token']?? "";
+    state.callRole.value = data['call_role'] ?? "";
+    state.docId.value = data['doc_id'] ?? "";
+    state.toToken.value = data['to_token'] ?? "";
     print("... your name id ${state.toName.value}");
     initEngine();
   }
@@ -79,7 +83,7 @@ class VoiceCallController extends GetxController {
         scenario: AudioScenarioType.audioScenarioGameStreaming);
     await joinChannel();
     await sendNotification("voice");
-    if(state.callRole=="anchor"){
+    if (state.callRole == "anchor") {
       await player.play();
     }
   }
@@ -94,9 +98,9 @@ class VoiceCallController extends GetxController {
     print(".... the other user token is : ${state.toToken.value}");
 
     var res = await ChatAPI.call_notifications(params: callTokenRequestEntity);
-    if(res.code==0){
+    if (res.code == 0) {
       print("notification sent");
-    }else {
+    } else {
       print("Notification has problem");
     }
 
@@ -104,18 +108,22 @@ class VoiceCallController extends GetxController {
   }
 
   Future<String> getToken() async {
-    if(state.callRole=="anchor"){
-      state.channelId.value = md5.convert(utf8.encode("${profileToken}_${state.toToken}")).toString();
-    }else{
-      state.channelId.value = md5.convert(utf8.encode("${state.toToken}_${profileToken}")).toString();
+    if (state.callRole == "anchor") {
+      state.channelId.value = md5
+          .convert(utf8.encode("${profileToken}_${state.toToken}"))
+          .toString();
+    } else {
+      state.channelId.value = md5
+          .convert(utf8.encode("${state.toToken}_${profileToken}"))
+          .toString();
     }
 
-    CallTokenRequestEntity callTokenRequestEntity =  CallTokenRequestEntity();
+    CallTokenRequestEntity callTokenRequestEntity = CallTokenRequestEntity();
     callTokenRequestEntity.channel_name = state.channelId.value;
     print("... channel id is ${state.channelId.value}");
     print("...my access token is ${UserStore.to.token}");
     var res = await ChatAPI.call_token(params: callTokenRequestEntity);
-    if(res.code==0) {
+    if (res.code == 0) {
       return res.data!;
     }
     return "";
@@ -126,11 +134,10 @@ class VoiceCallController extends GetxController {
     EasyLoading.show(
         indicator: CircularProgressIndicator(),
         maskType: EasyLoadingMaskType.clear,
-        dismissOnTap: true
-    );
+        dismissOnTap: true);
 
     String token = await getToken();
-    if(token.isEmpty){
+    if (token.isEmpty) {
       EasyLoading.dismiss();
       Get.back();
       return;
@@ -158,6 +165,12 @@ class VoiceCallController extends GetxController {
   }
 
   Future<void> _dispose() async {
+    if (callTimer != null) {
+      callTimer.cancel();
+    }
+    if (state.callRole == "anchor") {
+      addCallTime();
+    }
     await player.pause();
     await engine.leaveChannel();
     await engine.release();
@@ -177,23 +190,95 @@ class VoiceCallController extends GetxController {
   }
 
   void callTime() {
-    callTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    callTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       callSecond = callSecond + 1;
-      if(callSecond >= 60){
-        callSecond =0;
+      if (callSecond >= 60) {
+        callSecond = 0;
         callMinute = callMinute + 1;
       }
-      if(callMinute >= 60){
-        callMinute =0;
+      if (callMinute >= 60) {
+        callMinute = 0;
         callHour = callHour + 1;
       }
       var hour = callHour < 10 ? "0$callHour" : "$callHour";
       var minute = callMinute < 10 ? "0$callMinute" : "$callMinute";
       var second = callSecond < 10 ? "0$callSecond" : "$callSecond";
-      if(callHour==0){
+      if (callHour == 0) {
         state.callTime.value = "$hour:$minute:$second";
-        state.callTimeNum.value = "$callHour and $callMinute minute and $callSecond second";
+        state.callTimeNum.value =
+            "$callHour and $callMinute minute and $callSecond second";
       }
     });
+  }
+
+  void sendMessage(String sendContent) async {
+    if (state.docId.value.isEmpty) {
+      return;
+    }
+    final content = Msgcontent(
+      token: profileToken,
+      content: sendContent,
+      type: "text",
+      addtime: Timestamp.now(),
+    );
+
+    await db
+        .collection("message")
+        .doc(state.docId.value)
+        .collection("msg_list")
+        .withConverter(
+      fromFirestore: Msgcontent.fromFirestore,
+      toFirestore: (Msgcontent msgContent, options) =>
+          msgContent.toFirestore(),
+    )
+        .add(content);
+    var messageResponse = await db
+        .collection("message")
+        .doc(state.docId.value)
+        .withConverter(
+      fromFirestore: Msg.fromFirestore,
+      toFirestore: (Msg msg, options) => msg.toFirestore(),
+    )
+        .get();
+    if (messageResponse.data() != null) {
+      var item = messageResponse.data()!;
+      int toMsgNum = item.to_msg_num == null ? 0 : item.to_msg_num!;
+      int fromMsgNum = item.from_msg_num == null ? 0 : item.from_msg_num!;
+      if (item.from_token == profileToken) {
+        fromMsgNum = fromMsgNum + 1;
+      } else {
+        toMsgNum = toMsgNum + 1;
+      }
+      await db.collection("message").doc(state.docId.value).update({
+        "to_msg_num": toMsgNum,
+        "from_msg_num": fromMsgNum,
+        "last_msg": sendContent,
+        "last_time": Timestamp.now()
+      });
+    }
+  }
+
+  void addCallTime() async {
+    var profile = UserStore.to.profile;
+    var msgData = ChatCall(
+      from_token: profile.token,
+      to_token: state.toToken.value,
+      from_name: profile.name,
+      to_name: state.toName.value,
+      from_avatar: profile.avatar,
+      to_avatar: state.toAvatar.value,
+      call_time: state.callTimeNum.value,
+      type: "voice",
+      last_time: Timestamp.now(),
+    );
+    await db
+        .collection("chat_call")
+        .withConverter(
+      fromFirestore: ChatCall.fromFirestore,
+      toFirestore: (ChatCall msg, options) => msg.toFirestore(),
+    )
+        .add(msgData);
+    String sendContent = "voice time ${state.callTimeNum.value}";
+    sendMessage(sendContent);
   }
 }
