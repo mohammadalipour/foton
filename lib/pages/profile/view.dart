@@ -398,8 +398,7 @@ class ProfilePage extends GetView<ProfileController> {
                   ),
                   maxLines: 1,
                   autocorrect: false,
-                  // 自动纠正
-                  obscureText: false, // 隐藏输入内容, 密码框
+                  obscureText: false,
                 )),
             Container(
               width: 50.w,
