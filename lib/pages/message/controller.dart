@@ -21,6 +21,7 @@ class MessageController extends GetxController {
 
   Future<void> goProfile() async {
     await Get.toNamed(AppRoutes.Profile, arguments: state.headDetail.value);
+    getProfile();
   }
 
   @override
